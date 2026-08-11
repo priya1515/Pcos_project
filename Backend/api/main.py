@@ -1,7 +1,10 @@
 import io
 import sys
 import os
+import base64
+import numpy as np
 import torch
+import torch.nn.functional as F
 from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
@@ -27,6 +30,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5174",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -44,6 +49,63 @@ image_model = image_model.to(device)
 image_model.eval()
 
 transform = get_transforms(is_training=False)
+
+
+# ── Grad-CAM ─────────────────────────────────────────────────────────────────
+
+def generate_gradcam(pil_image: Image.Image, target_class_idx: int) -> str:
+    """
+    Grad-CAM on image_model.layer4.
+    Works even when all model weights are frozen (requires_grad=False).
+    Uses retain_grad() on the feature map so autograd keeps its gradient.
+    """
+    input_tensor = transform(pil_image).unsqueeze(0).to(device)
+
+    feat_map = {}
+
+    def fwd_hook(module, inp, out):
+        out.retain_grad()          # keep grad on this non-leaf tensor
+        feat_map["out"] = out
+
+    handle = image_model.layer4.register_forward_hook(fwd_hook)
+
+    image_model.zero_grad()
+    with torch.enable_grad():
+        logits = image_model(input_tensor)          # (1, num_classes)
+        score  = logits[0, target_class_idx]
+        score.backward()
+
+    handle.remove()
+    image_model.zero_grad()
+
+    feat = feat_map["out"]                          # (1, C, H, W)
+    grad = feat.grad                                # (1, C, H, W)
+
+    if grad is None:
+        raise RuntimeError("Grad-CAM: gradient is None after backward")
+
+    weights = grad.mean(dim=(2, 3), keepdim=True)   # (1, C, 1, 1)
+    cam = F.relu((weights * feat).sum(dim=1, keepdim=True))  # (1,1,H,W)
+    cam = F.interpolate(cam, size=(224, 224), mode="bilinear", align_corners=False)
+    cam = cam.squeeze().detach().cpu().numpy()       # (224, 224)
+
+    lo, hi = cam.min(), cam.max()
+    cam = (cam - lo) / (hi - lo + 1e-8)
+
+    # Jet colormap: blue → cyan → green → yellow → red
+    r = np.clip(1.5 - np.abs(cam * 4.0 - 3.0), 0.0, 1.0)
+    g = np.clip(1.5 - np.abs(cam * 4.0 - 2.0), 0.0, 1.0)
+    b = np.clip(1.5 - np.abs(cam * 4.0 - 1.0), 0.0, 1.0)
+    heatmap = Image.fromarray(
+        (np.stack([r, g, b], axis=-1) * 255).astype(np.uint8)
+    ).resize(pil_image.size, Image.BILINEAR)
+
+    base    = pil_image.convert("RGB")
+    overlay = Image.blend(base, heatmap, alpha=0.50)
+
+    buf = io.BytesIO()
+    overlay.save(buf, format="PNG")
+    return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
 
 INDEX_HTML = """<!DOCTYPE html>
 <html lang="en">
@@ -418,16 +480,23 @@ async def predict_multimodal(
     # ── Image branch ──
     try:
         contents = await file.read()
-        image = Image.open(io.BytesIO(contents)).convert("RGB")
-        input_tensor = transform(image).unsqueeze(0).to(device)
+        pil_image = Image.open(io.BytesIO(contents)).convert("RGB")
+        input_tensor = transform(pil_image).unsqueeze(0).to(device)
 
         with torch.inference_mode():
             outputs = image_model(input_tensor)
             img_probs = torch.nn.functional.softmax(outputs[0], dim=0)
 
         image_pcos_prob = img_probs[CLASS_NAMES.index("pcos")].item()
+        target_idx = int(torch.argmax(img_probs).item())
     except Exception as e:
         raise HTTPException(status_code=422, detail=f"Image processing failed: {e}")
+
+    # ── Grad-CAM (uses already-loaded image_model, no reload) ──
+    try:
+        gradcam_b64 = generate_gradcam(pil_image, target_idx)
+    except Exception:
+        gradcam_b64 = None
 
     # ── Clinical branch ──
     clinical_data = {
@@ -478,6 +547,7 @@ async def predict_multimodal(
             "pcos_probability": round(image_pcos_prob, 4),
             "normal_probability": round(1.0 - image_pcos_prob, 4),
         },
+        "gradcam_image": gradcam_b64,
     }
 
 
