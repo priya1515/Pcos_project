@@ -1,5 +1,4 @@
 import { ArrowRightLeft, FileDown, Trash2 } from "lucide-react";
-import { Link } from "react-router-dom";
 import Button from "../common/Button";
 import Card from "../common/Card";
 import StatusBadge from "../common/StatusBadge";
@@ -60,9 +59,6 @@ function ScanDetails({ scan, onCompare, onDownload, onDelete }) {
           <Button variant="danger" onClick={onDelete}>
             <Trash2 className="h-4 w-4" />
             Delete
-          </Button>
-          <Button as={Link} to="/new-scan" variant="ghost">
-            New Analysis
           </Button>
         </Card>
 

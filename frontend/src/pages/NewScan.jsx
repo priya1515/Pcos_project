@@ -15,7 +15,7 @@ const CLINICAL_FIELDS = [
   { key: "pulse_rate",   label: "Pulse Rate",               unit: "bpm",      min: 40,  max: 200,  step: 1    },
   { key: "rbs",          label: "Random Blood Sugar",       unit: "mg/dl",    min: 50,  max: 400,  step: 0.1  },
   { key: "bp_systolic",  label: "Systolic Blood Pressure",  unit: "mmHg",     min: 70,  max: 200,  step: 1    },
-  { key: "cycle_length", label: "Cycle Length",             unit: "days",     min: 1,   max: 15,   step: 1    },
+  { key: "cycle_length", label: "Cycle Length",             unit: "days",     min: 1,   max: 35,   step: 1    },
   { key: "lh",           label: "LH",                       unit: "mIU/mL",   min: 0,   max: 200,  step: 0.01 },
   { key: "amh",          label: "AMH",                      unit: "ng/mL",    min: 0,   max: 20,   step: 0.01 },
   { key: "prl",          label: "Prolactin (PRL)",          unit: "ng/mL",    min: 0,   max: 200,  step: 0.01 },
@@ -35,6 +35,7 @@ function NewScan() {
   const [file, setFile] = useState(null);
   const [clinical, setClinical] = useState(EMPTY_CLINICAL);
   const [result, setResult] = useState(null);
+  const [gradcamUrl, setGradcamUrl] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [savedScanId, setSavedScanId] = useState("");
@@ -60,6 +61,7 @@ function NewScan() {
     setFile(null);
     setClinical(EMPTY_CLINICAL);
     setResult(null);
+    setGradcamUrl(null);
     setSavedScanId("");
     setError("");
   }
@@ -92,6 +94,7 @@ function NewScan() {
       );
       const data = await predictMultimodal(file, numericClinical);
       setResult(data);
+      setGradcamUrl(data.gradcam_image || null);
     } catch (requestError) {
       setError(
         health.status === "offline"
@@ -196,17 +199,25 @@ function NewScan() {
       {loading && <AnalysisLoader />}
 
       {result && (
-        <PredictionResult result={result} onSave={handleSave} canSave={!savedScanId} />
+        <PredictionResult
+          result={result}
+          onSave={handleSave}
+          canSave={!savedScanId}
+          originalImageUrl={previewUrl}
+          gradcamUrl={gradcamUrl}
+        />
       )}
 
       {savedScanId && (
-        <Card className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm text-[var(--color-muted-foreground)]">Saved scan</p>
-            <p className="mt-2 text-lg font-semibold text-[var(--color-foreground)]">{savedScanId}</p>
-          </div>
-          <Button onClick={() => navigate(`/history/${savedScanId}`)}>Open Scan Details</Button>
-        </Card>
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-800">
+          Scan saved as <span className="font-semibold">{savedScanId}</span>. View it in{" "}
+          <button
+            onClick={() => navigate(`/history/${savedScanId}`)}
+            className="font-semibold underline underline-offset-2"
+          >
+            Scan History
+          </button>.
+        </div>
       )}
     </div>
   );
