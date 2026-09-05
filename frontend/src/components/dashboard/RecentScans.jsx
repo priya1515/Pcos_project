@@ -21,18 +21,18 @@ function RecentScans({ scans }) {
       <div className="mt-6 overflow-x-auto">
         <table className="min-w-full divide-y divide-[var(--color-border)] text-left text-sm">
           <thead>
-            <tr className="text-[var(--color-muted-foreground)]">
-              <th className="pb-3 font-medium">Scan ID</th>
-              <th className="pb-3 font-medium">Date</th>
-              <th className="pb-3 font-medium">Prediction</th>
-              <th className="pb-3 font-medium">Confidence</th>
-              <th className="pb-3 font-medium">Status</th>
-              <th className="pb-3 font-medium">Actions</th>
+            <tr className="border-b border-[var(--color-border)] text-[var(--color-muted-foreground)]">
+              <th className="pb-3 text-xs font-bold uppercase tracking-[0.14em]">Scan ID</th>
+              <th className="pb-3 text-xs font-bold uppercase tracking-[0.14em]">Date</th>
+              <th className="pb-3 text-xs font-bold uppercase tracking-[0.14em]">Prediction</th>
+              <th className="pb-3 text-xs font-bold uppercase tracking-[0.14em]">Confidence</th>
+              <th className="pb-3 text-xs font-bold uppercase tracking-[0.14em]">Status</th>
+              <th className="pb-3 text-xs font-bold uppercase tracking-[0.14em]">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--color-border)]">
             {scans.map((scan) => (
-              <tr key={scan.id}>
+              <tr key={scan.id} className="transition-colors hover:bg-[var(--color-surface-subtle)]">
                 <td className="py-4 font-semibold text-[var(--color-foreground)]">{scan.id}</td>
                 <td className="py-4 text-[var(--color-muted-foreground)]">{formatShortDate(scan.createdAt)}</td>
                 <td className="py-4">
