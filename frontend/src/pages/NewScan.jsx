@@ -116,6 +116,7 @@ function NewScan() {
       fileName: file.name,
       imageDataUrl,
       imageSize: file.size,
+      clinical,
       result: {
         prediction: finalPrediction,
         confidence: result.final ? result.final.pcos_probability * 100 : 0,
@@ -205,6 +206,7 @@ function NewScan() {
           canSave={!savedScanId}
           originalImageUrl={previewUrl}
           gradcamUrl={gradcamUrl}
+          clinical={clinical}
         />
       )}
 

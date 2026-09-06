@@ -8,6 +8,7 @@ import ScanDetailsPage from "./pages/ScanDetailsPage";
 import Compare from "./pages/Compare";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
+import Federation from "./pages/Federation";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
             <Route path="/history/:scanId" element={<ScanDetailsPage />} />
             <Route path="/compare" element={<Compare />} />
             <Route path="/reports" element={<Reports />} />
+            <Route path="/federation" element={<Federation />} />
             <Route path="/settings" element={<Settings />} />
           </Route>
         </Routes>

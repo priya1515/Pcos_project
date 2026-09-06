@@ -1,14 +1,15 @@
-import { Activity, BarChart3, FileText, Gauge, History, Menu, ScanLine, Settings2 } from "lucide-react";
+import { Activity, BarChart3, FileText, Gauge, History, Menu, Network, ScanLine, Settings2 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import StatusBadge from "../common/StatusBadge";
 
 const navItems = [
-  { to: "/",        label: "Dashboard",    icon: Gauge    },
-  { to: "/new-scan",label: "New Scan",     icon: ScanLine },
-  { to: "/history", label: "Scan History", icon: History  },
-  { to: "/compare", label: "Compare Scans",icon: BarChart3},
-  { to: "/reports", label: "Reports",      icon: FileText },
-  { to: "/settings",label: "Settings",     icon: Settings2},
+  { to: "/",           label: "Dashboard",         icon: Gauge    },
+  { to: "/new-scan",   label: "New Scan",           icon: ScanLine },
+  { to: "/history",    label: "Scan History",       icon: History  },
+  { to: "/compare",    label: "Compare Scans",      icon: BarChart3},
+  { to: "/reports",    label: "Reports",            icon: FileText },
+  { to: "/federation", label: "Federated Learning", icon: Network  },
+  { to: "/settings",   label: "Settings",           icon: Settings2},
 ];
 
 function Sidebar({ health, onClose }) {

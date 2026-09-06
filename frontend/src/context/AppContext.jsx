@@ -43,7 +43,7 @@ export function AppProvider({ children }) {
     setCompareSelection([]);
   }
 
-  function saveResultScan({ fileName, imageDataUrl, imageSize, result }) {
+  function saveResultScan({ fileName, imageDataUrl, imageSize, result, clinical }) {
     const meta = getPredictionMeta(result.prediction);
 
     const scan = saveScan({
@@ -58,6 +58,8 @@ export function AppProvider({ children }) {
       model: result.model,
       analysisType: result.analysisType,
       status: "Completed",
+      gradcamImage: result.raw?.gradcam_image || null,
+      clinical: clinical || null,
     });
 
     pushToast({

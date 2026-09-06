@@ -1,6 +1,7 @@
 import io
 import sys
 import os
+import json
 import base64
 import numpy as np
 import torch
@@ -56,43 +57,47 @@ transform = get_transforms(is_training=False)
 def generate_gradcam(pil_image: Image.Image, target_class_idx: int) -> str:
     """
     Grad-CAM on image_model.layer4.
-    Works even when all model weights are frozen (requires_grad=False).
-    Uses retain_grad() on the feature map so autograd keeps its gradient.
+    Uses register_full_backward_hook to capture gradients even when
+    model weights are frozen (requires_grad=False).
     """
     input_tensor = transform(pil_image).unsqueeze(0).to(device)
 
     feat_map = {}
+    grad_map = {}
 
     def fwd_hook(module, inp, out):
-        out.retain_grad()          # keep grad on this non-leaf tensor
         feat_map["out"] = out
 
-    handle = image_model.layer4.register_forward_hook(fwd_hook)
+    def bwd_hook(module, grad_in, grad_out):
+        grad_map["out"] = grad_out[0]
+
+    fwd_handle = image_model.layer4.register_forward_hook(fwd_hook)
+    bwd_handle = image_model.layer4.register_full_backward_hook(bwd_hook)
 
     image_model.zero_grad()
     with torch.enable_grad():
-        logits = image_model(input_tensor)          # (1, num_classes)
+        # Re-run forward with grad enabled on input so graph is built
+        inp = input_tensor.requires_grad_(True)
+        logits = image_model(inp)
         score  = logits[0, target_class_idx]
         score.backward()
 
-    handle.remove()
+    fwd_handle.remove()
+    bwd_handle.remove()
     image_model.zero_grad()
 
-    feat = feat_map["out"]                          # (1, C, H, W)
-    grad = feat.grad                                # (1, C, H, W)
-
-    if grad is None:
-        raise RuntimeError("Grad-CAM: gradient is None after backward")
+    feat = feat_map["out"].detach()                 # (1, C, H, W)
+    grad = grad_map["out"].detach()                 # (1, C, H, W)
 
     weights = grad.mean(dim=(2, 3), keepdim=True)   # (1, C, 1, 1)
     cam = F.relu((weights * feat).sum(dim=1, keepdim=True))  # (1,1,H,W)
     cam = F.interpolate(cam, size=(224, 224), mode="bilinear", align_corners=False)
-    cam = cam.squeeze().detach().cpu().numpy()       # (224, 224)
+    cam = cam.squeeze().cpu().numpy()               # (224, 224)
 
     lo, hi = cam.min(), cam.max()
     cam = (cam - lo) / (hi - lo + 1e-8)
 
-    # Jet colormap: blue → cyan → green → yellow → red
+    # Jet colormap
     r = np.clip(1.5 - np.abs(cam * 4.0 - 3.0), 0.0, 1.0)
     g = np.clip(1.5 - np.abs(cam * 4.0 - 2.0), 0.0, 1.0)
     b = np.clip(1.5 - np.abs(cam * 4.0 - 1.0), 0.0, 1.0)
@@ -554,3 +559,53 @@ async def predict_multimodal(
 # if __name__ == "__main__":
 #     import uvicorn
 #     uvicorn.run(app, host="0.0.0.0", port=7860)
+
+
+# ── Federated Learning endpoints ─────────────────────────────────────────────
+
+_FL_METRICS_PATH = os.path.join(_BACKEND_DIR, "fl_metrics.json")
+
+_FL_HOSPITALS = [
+    { "id": "hospital_a", "name": "Hospital A", "location": "Node 1" },
+    { "id": "hospital_b", "name": "Hospital B", "location": "Node 2" },
+    { "id": "hospital_c", "name": "Hospital C", "location": "Node 3" },
+]
+
+
+def _read_fl_metrics() -> dict:
+    if not os.path.exists(_FL_METRICS_PATH):
+        return {
+            "status": "idle",
+            "current_round": 0,
+            "total_rounds": 0,
+            "rounds": [],
+            "best_accuracy": 0.0,
+            "started_at": None,
+            "completed_at": None,
+            "clients_connected": 0,
+        }
+    with open(_FL_METRICS_PATH) as f:
+        return json.load(f)
+
+
+@app.get("/federated/status", tags=["Federated"])
+def federated_status():
+    """Returns current FL training status and round metrics."""
+    metrics = _read_fl_metrics()
+    return {
+        "success": True,
+        "hospitals": _FL_HOSPITALS,
+        **metrics,
+    }
+
+
+@app.get("/federated/hospitals", tags=["Federated"])
+def federated_hospitals():
+    """Returns list of participating hospital nodes."""
+    metrics  = _read_fl_metrics()
+    connected = metrics.get("clients_connected", 0)
+    hospitals = [
+        {**h, "connected": i < connected}
+        for i, h in enumerate(_FL_HOSPITALS)
+    ]
+    return {"success": True, "hospitals": hospitals}

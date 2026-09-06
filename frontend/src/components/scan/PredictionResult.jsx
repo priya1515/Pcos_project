@@ -1,9 +1,10 @@
-import { CheckCircle2, Save } from "lucide-react";
+import { Activity, AlertTriangle, CheckCircle2, Heart, Save } from "lucide-react";
 import Button from "../common/Button";
 import Card from "../common/Card";
 import ProbabilityChart from "./ProbabilityChart";
 import { formatPercent } from "../../utils/formatters";
 import { getPredictionMeta } from "../../utils/scan";
+import { generateRecommendations, getRiskLabel } from "../../utils/recommendations";
 
 function toDataSrc(raw) {
   if (!raw) return null;
@@ -11,7 +12,33 @@ function toDataSrc(raw) {
   return `data:image/png;base64,${raw}`;
 }
 
-function PredictionResult({ result, onSave, canSave, originalImageUrl, gradcamUrl }) {
+const CATEGORY_META = {
+  medical:   { label: "Medical",   icon: AlertTriangle, color: "text-rose-600",  bg: "bg-rose-50",  border: "border-rose-200"  },
+  lifestyle: { label: "Lifestyle", icon: Heart,         color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200" },
+};
+
+function RecommendationCategory({ type, items }) {
+  if (!items?.length) return null;
+  const { label, icon: Icon, color, bg, border } = CATEGORY_META[type];
+  return (
+    <div className={`rounded-xl border ${border} ${bg} p-4`}>
+      <div className={`mb-3 flex items-center gap-2 ${color}`}>
+        <Icon className="h-4 w-4 shrink-0" />
+        <p className="text-xs font-bold uppercase tracking-[0.14em]">{label}</p>
+      </div>
+      <ul className="space-y-2">
+        {items.map((item, i) => (
+          <li key={i} className="flex items-start gap-2 text-sm text-[var(--color-foreground)]">
+            <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${color.replace("text-", "bg-")}`} />
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function PredictionResult({ result, onSave, canSave, originalImageUrl, gradcamUrl, clinical }) {
   const isMultimodal = Boolean(result?.final);
   const gradcamSrc = toDataSrc(gradcamUrl);
 
@@ -31,8 +58,20 @@ function PredictionResult({ result, onSave, canSave, originalImageUrl, gradcamUr
       ? result.probabilities.normal
       : (result.probabilities?.normal ?? 0) * 100;
 
-  const meta = getPredictionMeta(prediction);
-  const isPcos = prediction === "pcos";
+  const meta    = getPredictionMeta(prediction);
+  const isPcos  = prediction === "pcos";
+  const risk    = getRiskLabel(pcosPct);
+  const recs    = generateRecommendations(pcosPct, clinical);
+  const hasRecs = recs.medical.length || recs.lifestyle.length;
+
+  const riskColorMap = {
+    emerald: { text: "text-emerald-700", bg: "bg-emerald-100", border: "border-emerald-300" },
+    yellow:  { text: "text-yellow-700",  bg: "bg-yellow-100",  border: "border-yellow-300"  },
+    orange:  { text: "text-orange-700",  bg: "bg-orange-100",  border: "border-orange-300"  },
+    red:     { text: "text-red-700",     bg: "bg-red-100",     border: "border-red-300"     },
+    rose:    { text: "text-rose-700",    bg: "bg-rose-100",    border: "border-rose-300"    },
+  };
+  const rc = riskColorMap[risk.color];
 
   return (
     <div className="space-y-4">
@@ -45,6 +84,9 @@ function PredictionResult({ result, onSave, canSave, originalImageUrl, gradcamUr
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--color-muted-foreground)]">Analysis Complete</p>
             <p className="mt-0.5 text-xl font-semibold text-[var(--color-foreground)]">{meta.summary}</p>
+            <span className={`mt-1 inline-block rounded-full border px-2.5 py-0.5 text-xs font-semibold ${rc.text} ${rc.bg} ${rc.border}`}>
+              {risk.label}
+            </span>
           </div>
         </div>
         <div className="text-right">
@@ -82,32 +124,62 @@ function PredictionResult({ result, onSave, canSave, originalImageUrl, gradcamUr
         )}
       </Card>
 
-      {/* ── Grad-CAM ── */}
+      {/* ── Grad-CAM + XAI ── */}
       {gradcamSrc && (
         <Card className="space-y-4">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--color-muted-foreground)]">Grad-CAM Heatmap</p>
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--color-muted-foreground)]">Explainable AI — Grad-CAM</p>
             <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
-              Regions the model focused on when making its prediction.
+              Gradient-weighted Class Activation Map showing which regions of the ultrasound most influenced the model's {isPcos ? "PCOS" : "Normal"} prediction.
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <p className="mb-2 text-xs font-semibold text-[var(--color-muted-foreground)]">Original</p>
-              <img
-                src={originalImageUrl}
-                alt="Original ultrasound"
-                className="w-full rounded-2xl border border-[var(--color-border)] object-cover"
-              />
+              <img src={originalImageUrl} alt="Original ultrasound" className="w-full rounded-2xl border border-[var(--color-border)] object-cover" />
             </div>
             <div>
               <p className="mb-2 text-xs font-semibold text-[var(--color-muted-foreground)]">Grad-CAM overlay</p>
-              <img
-                src={gradcamSrc}
-                alt="Grad-CAM heatmap"
-                className="w-full rounded-2xl border border-[var(--color-border)] object-cover"
-              />
+              <img src={gradcamSrc} alt="Grad-CAM heatmap" className="w-full rounded-2xl border border-[var(--color-border)] object-cover" />
             </div>
+          </div>
+          <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-subtle)] p-3">
+            <p className="mb-2 text-xs font-semibold text-[var(--color-muted-foreground)]">Heatmap legend</p>
+            <div className="h-3 flex-1 rounded-full" style={{ background: "linear-gradient(to right, #00f, #0ff, #0f0, #ff0, #f00)" }} />
+            <div className="mt-1 flex justify-between text-xs text-[var(--color-muted-foreground)]">
+              <span>Low influence</span>
+              <span>High influence</span>
+            </div>
+          </div>
+          <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-subtle)] p-3 space-y-1">
+            <p className="text-xs font-semibold text-[var(--color-muted-foreground)]">How to interpret</p>
+            <ul className="text-xs text-[var(--color-muted-foreground)] space-y-0.5 list-disc list-inside">
+              <li><span className="text-red-500 font-semibold">Red/yellow</span> regions had the highest impact on the prediction.</li>
+              <li><span className="text-blue-500 font-semibold">Blue</span> regions had little to no influence.</li>
+              {isPcos
+                ? <li>Highlighted areas likely correspond to follicular clusters or ovarian morphology indicative of PCOS.</li>
+                : <li>Highlighted areas correspond to normal ovarian tissue features the model used to rule out PCOS.</li>
+              }
+            </ul>
+          </div>
+        </Card>
+      )}
+
+      {/* ── Recommendations ── */}
+      {hasRecs && (
+        <Card className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Activity className="h-5 w-5 text-[var(--color-primary)]" />
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--color-muted-foreground)]">Recommendations</p>
+              <p className="mt-0.5 text-sm text-[var(--color-muted-foreground)]">
+                Personalised guidance based on your clinical values and risk level.
+              </p>
+            </div>
+          </div>
+          <div className="space-y-3">
+            <RecommendationCategory type="medical"   items={recs.medical}   />
+            <RecommendationCategory type="lifestyle" items={recs.lifestyle} />
           </div>
         </Card>
       )}
