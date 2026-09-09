@@ -1,0 +1,170 @@
+{
+  "status": "completed",
+  "current_round": 10,
+  "total_rounds": 10,
+  "rounds": [
+    {
+      "round": 1,
+      "clients": 3,
+      "timestamp": "2026-09-09T10:04:59.714481",
+      "state": "evaluated",
+      "accuracy": 100.0,
+      "loss": 0.0195,
+      "image_accuracy": 100.0,
+      "image_loss": 0.0195,
+      "clinical_accuracy": 83.2,
+      "clinical_loss": 0.411,
+      "fused_accuracy": 91.6
+    },
+    {
+      "round": 2,
+      "clients": 3,
+      "timestamp": "2026-09-09T10:15:51.772857",
+      "state": "evaluated",
+      "accuracy": 100.0,
+      "loss": 0.0071,
+      "image_accuracy": 100.0,
+      "image_loss": 0.0071,
+      "clinical_accuracy": 85.08,
+      "clinical_loss": 0.3899,
+      "fused_accuracy": 92.54
+    },
+    {
+      "round": 3,
+      "clients": 3,
+      "timestamp": "2026-09-09T10:26:05.310367",
+      "state": "evaluated",
+      "accuracy": 100.0,
+      "loss": 0.0089,
+      "image_accuracy": 100.0,
+      "image_loss": 0.0089,
+      "clinical_accuracy": 84.13,
+      "clinical_loss": 0.3796,
+      "fused_accuracy": 92.06
+    },
+    {
+      "round": 4,
+      "clients": 3,
+      "timestamp": "2026-09-09T10:37:29.698176",
+      "state": "evaluated",
+      "accuracy": 100.0,
+      "loss": 0.0032,
+      "image_accuracy": 100.0,
+      "image_loss": 0.0032,
+      "clinical_accuracy": 86.01,
+      "clinical_loss": 0.3729,
+      "fused_accuracy": 93.0
+    },
+    {
+      "round": 5,
+      "clients": 3,
+      "timestamp": "2026-09-09T10:48:33.168697",
+      "state": "evaluated",
+      "accuracy": 100.0,
+      "loss": 0.0008,
+      "image_accuracy": 100.0,
+      "image_loss": 0.0008,
+      "clinical_accuracy": 84.13,
+      "clinical_loss": 0.3706,
+      "fused_accuracy": 92.06
+    },
+    {
+      "round": 6,
+      "clients": 3,
+      "timestamp": "2026-09-09T10:58:42.160488",
+      "state": "evaluated",
+      "accuracy": 100.0,
+      "loss": 0.0005,
+      "image_accuracy": 100.0,
+      "image_loss": 0.0005,
+      "clinical_accuracy": 85.08,
+      "clinical_loss": 0.3653,
+      "fused_accuracy": 92.54
+    },
+    {
+      "round": 7,
+      "clients": 3,
+      "timestamp": "2026-09-09T11:08:59.596868",
+      "state": "evaluated",
+      "accuracy": 100.0,
+      "loss": 0.0002,
+      "image_accuracy": 100.0,
+      "image_loss": 0.0002,
+      "clinical_accuracy": 86.01,
+      "clinical_loss": 0.3645,
+      "fused_accuracy": 93.0
+    },
+    {
+      "round": 8,
+      "clients": 3,
+      "timestamp": "2026-09-09T11:19:26.964575",
+      "state": "evaluated",
+      "accuracy": 97.92,
+      "loss": 0.0549,
+      "image_accuracy": 97.92,
+      "image_loss": 0.0549,
+      "clinical_accuracy": 85.08,
+      "clinical_loss": 0.3636,
+      "fused_accuracy": 91.5
+    },
+    {
+      "round": 9,
+      "clients": 3,
+      "timestamp": "2026-09-09T11:30:44.270369",
+      "state": "evaluated",
+      "accuracy": 100.0,
+      "loss": 0.0,
+      "image_accuracy": 100.0,
+      "image_loss": 0.0,
+      "clinical_accuracy": 85.08,
+      "clinical_loss": 0.3624,
+      "fused_accuracy": 92.54
+    },
+    {
+      "round": 10,
+      "clients": 3,
+      "timestamp": "2026-09-09T11:42:01.767516",
+      "state": "evaluated",
+      "accuracy": 100.0,
+      "loss": 0.0,
+      "image_accuracy": 100.0,
+      "image_loss": 0.0,
+      "clinical_accuracy": 84.15,
+      "clinical_loss": 0.3601,
+      "fused_accuracy": 92.08
+    }
+  ],
+  "best_accuracy": 100.0,
+  "started_at": "2026-09-09T09:51:38.136327",
+  "completed_at": "2026-09-09T11:42:01.772718",
+  "clients_connected": 3,
+  "data_hash": "05663af4a33e1bf3965235669e7b6fdd",
+  "weights": {
+    "global": {
+      "l2_norm": 499.6491,
+      "mean_abs": 0.025004,
+      "tensors": 181
+    },
+    "local": {
+      "hospital_c": {
+        "image_l2_norm": 499.5133,
+        "clinical_l2_norm": 11.9758,
+        "image_mean_abs": 0.0249954,
+        "clinical_mean_abs": 0.1104714
+      },
+      "hospital_a": {
+        "image_l2_norm": 499.5094,
+        "clinical_l2_norm": 11.9496,
+        "image_mean_abs": 0.0249934,
+        "clinical_mean_abs": 0.1100732
+      },
+      "hospital_b": {
+        "image_l2_norm": 499.5178,
+        "clinical_l2_norm": 11.9471,
+        "image_mean_abs": 0.0249986,
+        "clinical_mean_abs": 0.1100289
+      }
+    },
+    "round": 10
+  }
+}

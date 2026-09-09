@@ -3,6 +3,8 @@ import sys
 import os
 import json
 import base64
+import subprocess
+import threading
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -588,6 +590,12 @@ def _read_fl_metrics() -> dict:
         return json.load(f)
 
 
+_FL_COMPARISON_PATH = os.path.join(_BACKEND_DIR, "fl_comparison.json")
+_FL_SCAN_LOG_PATH   = os.path.join(_BACKEND_DIR, "fl_scan_log.json")
+
+VALID_HOSPITALS = {"hospital_a", "hospital_b", "hospital_c"}
+
+
 @app.get("/federated/status", tags=["Federated"])
 def federated_status():
     """Returns current FL training status and round metrics."""
@@ -601,11 +609,259 @@ def federated_status():
 
 @app.get("/federated/hospitals", tags=["Federated"])
 def federated_hospitals():
-    """Returns list of participating hospital nodes."""
+    """Returns nodes, keeping nodes with assigned scans visibly active."""
     metrics  = _read_fl_metrics()
     connected = metrics.get("clients_connected", 0)
+    scans = []
+    if os.path.exists(_FL_SCAN_LOG_PATH):
+        try:
+            with open(_FL_SCAN_LOG_PATH) as f:
+                scans = json.load(f)
+        except (OSError, json.JSONDecodeError):
+            pass
     hospitals = [
-        {**h, "connected": i < connected}
+        {
+            **h,
+            "scan_count": sum(scan.get("hospital") == h["id"] for scan in scans),
+            "connected": i < connected or any(scan.get("hospital") == h["id"] for scan in scans),
+        }
         for i, h in enumerate(_FL_HOSPITALS)
     ]
     return {"success": True, "hospitals": hospitals}
+
+
+@app.get("/federated/comparison", tags=["Federated"])
+def federated_comparison():
+    """
+    Stage 5: Returns centralized vs local vs federated accuracy comparison.
+    Run fl_evaluate.py first to generate fl_comparison.json.
+    """
+    if not os.path.exists(_FL_COMPARISON_PATH):
+        return {"success": False, "message": "Run fl_evaluate.py to generate comparison data.", "data": []}
+    with open(_FL_COMPARISON_PATH) as f:
+        data = json.load(f)
+    return {"success": True, "data": data}
+
+
+@app.post("/federated/scans", tags=["Federated"])
+def log_federated_scan(payload: dict):
+    """
+    Receives a scan result from the frontend and appends it to fl_scan_log.json
+    tagged with the chosen hospital node.
+    """
+    hospital = payload.get("hospital", "")
+    if hospital not in VALID_HOSPITALS:
+        raise HTTPException(status_code=422, detail=f"Invalid hospital. Choose from: {sorted(VALID_HOSPITALS)}")
+
+    entry = {
+        "id":                  payload.get("id", ""),
+        "hospital":            hospital,
+        "timestamp":           payload.get("timestamp", ""),
+        "fileName":            payload.get("fileName", ""),
+        "prediction":          payload.get("prediction", ""),
+        "pcos_probability":    payload.get("pcos_probability", 0),
+        "normal_probability":  payload.get("normal_probability", 0),
+        "image_prediction":    payload.get("image_prediction", ""),
+        "clinical_prediction": payload.get("clinical_prediction", ""),
+    }
+
+    scans = []
+    if os.path.exists(_FL_SCAN_LOG_PATH):
+        with open(_FL_SCAN_LOG_PATH) as f:
+            scans = json.load(f)
+
+    scans.insert(0, entry)          # newest first
+    scans = scans[:200]             # keep last 200
+
+    with open(_FL_SCAN_LOG_PATH, "w") as f:
+        json.dump(scans, f, indent=2)
+
+    return {"success": True, "entry": entry}
+
+
+# ── FL process handle (module-level so stop can kill it) ─────────────────────
+_fl_process: subprocess.Popen | None = None
+_fl_pids: list[int] = []   # all child PIDs written by run_fl.py
+_fl_lock = threading.Lock()
+
+
+class FLStartRequest(BaseModel):
+    rounds: int = 10
+    epochs: int = 3
+
+
+def _kill_fl():
+    """Kill every tracked FL PID plus the run_fl parent on Windows."""
+    global _fl_process, _fl_pids
+    all_pids = list(_fl_pids)
+    if _fl_process:
+        all_pids.append(_fl_process.pid)
+    for pid in all_pids:
+        try:
+            # Do not make the HTTP Stop response wait for every Windows
+            # process to exit; taskkill continues independently.
+            subprocess.Popen(["taskkill", "/F", "/PID", str(pid)],
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except Exception:
+            pass
+    _fl_process = None
+    _fl_pids = []
+
+
+_FL_PIDS_PATH = os.path.join(_BACKEND_DIR, "fl_pids.json")
+_FL_LOG_PATH = os.path.join(_BACKEND_DIR, "fl_live_log.json")
+
+
+@app.post("/federated/start", tags=["Federated"])
+def federated_start(req: FLStartRequest):
+    """Pre-checks all hospital data, warns if unchanged, then launches run_fl.py."""
+    global _fl_process
+
+    with _fl_lock:
+        if _fl_process and _fl_process.poll() is None:
+            raise HTTPException(status_code=409, detail="FL session is already running.")
+
+    # ── pre-flight: verify each hospital has train/val data ──
+    hospitals = ["hospital_a", "hospital_b", "hospital_c"]
+    data_root = os.path.join(_BACKEND_DIR, "data", "federated")
+    issues: list[str] = []
+
+    for h in hospitals:
+        h_dir   = os.path.join(data_root, h)
+        label   = h.replace("hospital_", "Hospital ").upper()
+        if not os.path.isdir(os.path.join(h_dir, "train")):
+            issues.append(f"{label}: missing image train/ folder")
+        if not os.path.isdir(os.path.join(h_dir, "val")):
+            issues.append(f"{label}: missing image val/ folder")
+        if not os.path.isfile(os.path.join(h_dir, "clinical_train.csv")):
+            issues.append(f"{label}: missing clinical_train.csv")
+        if not os.path.isfile(os.path.join(h_dir, "clinical_val.csv")):
+            issues.append(f"{label}: missing clinical_val.csv")
+
+    if issues:
+        raise HTTPException(
+            status_code=422,
+            detail={"message": "Cannot start FL — data missing.", "issues": issues},
+        )
+
+    # ── data-unchanged check: hash all federated files ──
+    import hashlib
+    hasher = hashlib.md5()
+    for h in hospitals:
+        h_dir = os.path.join(data_root, h)
+        for root, _, files in os.walk(h_dir):
+            for fname in sorted(files):
+                fpath = os.path.join(root, fname)
+                try:
+                    hasher.update(fname.encode())
+                    hasher.update(str(os.path.getsize(fpath)).encode())
+                    hasher.update(str(int(os.path.getmtime(fpath))).encode())
+                except OSError:
+                    pass
+    current_hash = hasher.hexdigest()
+
+    prev_metrics = _read_fl_metrics()
+    prev_hash    = prev_metrics.get("data_hash", "")
+    data_unchanged = (prev_hash == current_hash and prev_metrics.get("status") == "completed")
+
+    # A completed run has already trained on this exact data snapshot.  Do not
+    # spend time and compute running it again; return a clear response the UI
+    # can show as soon as the Start button is clicked.
+    if data_unchanged:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "message": "No new federated data was found since the last completed training run. Add or update data before starting FL training again.",
+                "data_unchanged": True,
+            },
+        )
+
+    run_fl_path = os.path.join(_BACKEND_DIR, "run_fl.py")
+    with _fl_lock:
+        _fl_pids.clear()
+        if os.path.exists(_FL_PIDS_PATH):
+            os.remove(_FL_PIDS_PATH)
+        _fl_process = subprocess.Popen(
+            [sys.executable, run_fl_path,
+             "--rounds", str(req.rounds),
+             "--epochs", str(req.epochs),
+             "--pids_file", _FL_PIDS_PATH,
+             "--log_file", _FL_LOG_PATH,
+             "--data_hash", current_hash],
+            cwd=_BACKEND_DIR,
+        )
+
+    return {
+        "success": True,
+        "message": f"FL started — {req.rounds} rounds, {req.epochs} epochs/client.",
+        "pid": _fl_process.pid,
+        "data_unchanged": False,
+    }
+
+
+@app.get("/federated/logs", tags=["Federated"])
+def federated_logs(limit: int = 100):
+    """Returns recent FL server and hospital-local activity for the dashboard."""
+    if not os.path.exists(_FL_LOG_PATH):
+        return {"success": True, "logs": []}
+    try:
+        with open(_FL_LOG_PATH, encoding="utf-8") as file:
+            logs = json.load(file)
+    except (OSError, json.JSONDecodeError):
+        logs = []
+    return {"success": True, "logs": logs[-max(1, min(limit, 250)):]}
+
+
+@app.post("/federated/stop", tags=["Federated"])
+def federated_stop():
+    """Kills every FL process (server + all 3 clients + run_fl parent)."""
+    global _fl_process, _fl_pids
+
+    # load PIDs written by run_fl.py if in-memory list is empty (e.g. after restart)
+    with _fl_lock:
+        if not _fl_pids and os.path.exists(_FL_PIDS_PATH):
+            try:
+                with open(_FL_PIDS_PATH) as f:
+                    _fl_pids = json.load(f)
+            except Exception:
+                pass
+
+        if not _fl_pids and (_fl_process is None or _fl_process.poll() is not None):
+            # Uvicorn can restart while a former FL run has left its metrics
+            # marked as running. Recover that orphaned UI state so the Start
+            # button is usable again instead of leaving the dashboard stuck.
+            m = _read_fl_metrics()
+            m["status"] = "idle"
+            m["clients_connected"] = 0
+            with open(_FL_METRICS_PATH, "w") as f:
+                json.dump(m, f, indent=2)
+            return {"success": True, "message": "Cleared a stale FL session; no active training process was running."}
+
+        _kill_fl()
+
+    if os.path.exists(_FL_PIDS_PATH):
+        os.remove(_FL_PIDS_PATH)
+
+    # mark metrics as stopped
+    m = _read_fl_metrics()
+    if m.get("status") == "running":
+        m["status"] = "idle"
+        with open(_FL_METRICS_PATH, "w") as f:
+            json.dump(m, f, indent=2)
+
+    return {"success": True, "message": "FL session stopped."}
+
+
+@app.get("/federated/scans", tags=["Federated"])
+def get_federated_scans(hospital: str = None):
+    """
+    Returns all scans logged via /federated/scans.
+    Optionally filter by hospital query param: ?hospital=hospital_a
+    """
+    if not os.path.exists(_FL_SCAN_LOG_PATH):
+        return {"success": True, "scans": []}
+    with open(_FL_SCAN_LOG_PATH) as f:
+        scans = json.load(f)
+    if hospital:
+        scans = [s for s in scans if s.get("hospital") == hospital]
+    return {"success": True, "scans": scans}

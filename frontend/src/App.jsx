@@ -9,6 +9,7 @@ import Compare from "./pages/Compare";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import Federation from "./pages/Federation";
+import Help from "./pages/Help";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
             <Route path="/reports" element={<Reports />} />
             <Route path="/federation" element={<Federation />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/help" element={<Help />} />
           </Route>
         </Routes>
       </AppProvider>

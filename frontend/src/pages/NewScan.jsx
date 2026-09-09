@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { predictMultimodal } from "../api/prediction";
+import { apiFetch } from "../api/client";
 import Button from "../components/common/Button";
 import Card from "../components/common/Card";
 import AnalysisLoader from "../components/scan/AnalysisLoader";
@@ -8,6 +9,12 @@ import ImageUploader from "../components/scan/ImageUploader";
 import PredictionResult from "../components/scan/PredictionResult";
 import { useAppContext } from "../context/useAppContext";
 import { fileToDataUrl, validateImageFile } from "../utils/scan";
+
+const HOSPITALS = [
+  { id: "hospital_a", label: "Hospital A — Node 1" },
+  { id: "hospital_b", label: "Hospital B — Node 2" },
+  { id: "hospital_c", label: "Hospital C — Node 3" },
+];
 
 const CLINICAL_FIELDS = [
   { key: "age",          label: "Age",                      unit: "yrs",      min: 10,  max: 60,   step: 1    },
@@ -39,6 +46,7 @@ function NewScan() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [savedScanId, setSavedScanId] = useState("");
+  const [hospital, setHospital] = useState("hospital_a");
 
   const previewUrl = useMemo(() => (file ? URL.createObjectURL(file) : ""), [file]);
 
@@ -64,6 +72,7 @@ function NewScan() {
     setGradcamUrl(null);
     setSavedScanId("");
     setError("");
+    setHospital("hospital_a");
   }
 
   function handleClinicalChange(key, value) {
@@ -95,6 +104,24 @@ function NewScan() {
       const data = await predictMultimodal(file, numericClinical);
       setResult(data);
       setGradcamUrl(data.gradcam_image || null);
+
+      // Log scan to federated scan log with chosen hospital
+      const scanId = `scan-${Date.now()}`;
+      await apiFetch("/federated/scans", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id:                  scanId,
+          hospital,
+          timestamp:           new Date().toISOString(),
+          fileName:            file.name,
+          prediction:          data.final?.prediction || "unknown",
+          pcos_probability:    data.final?.pcos_probability || 0,
+          normal_probability:  data.final?.normal_probability || 0,
+          image_prediction:    data.image?.prediction || "",
+          clinical_prediction: data.clinical?.prediction || "",
+        }),
+      }).catch(() => {/* non-blocking — scan still works if log fails */});
     } catch (requestError) {
       setError(
         health.status === "offline"
@@ -114,6 +141,7 @@ function NewScan() {
 
     const savedScan = saveResultScan({
       fileName: file.name,
+      hospital,
       imageDataUrl,
       imageSize: file.size,
       clinical,
@@ -140,6 +168,32 @@ function NewScan() {
 
   return (
     <div className="space-y-6">
+
+      {/* Hospital selector */}
+      <Card className="flex flex-wrap items-center gap-4">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-semibold text-[var(--color-foreground)]">Assign to Hospital Node:</span>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {HOSPITALS.map((h) => (
+            <button
+              key={h.id}
+              onClick={() => setHospital(h.id)}
+              className={`rounded-xl px-4 py-2 text-sm font-bold transition-all border ${
+                hospital === h.id
+                  ? "bg-violet-600 text-white border-violet-600 shadow"
+                  : "bg-[var(--color-surface-subtle)] text-[var(--color-muted-foreground)] border-[var(--color-border)] hover:border-violet-400"
+              }`}
+            >
+              {h.label}
+            </button>
+          ))}
+        </div>
+        <span className="ml-auto text-xs text-[var(--color-muted-foreground)]">
+          This scan will be logged under <span className="font-semibold text-violet-600">{HOSPITALS.find(h => h.id === hospital)?.label}</span>
+        </span>
+      </Card>
+
       <ImageUploader
         file={file}
         previewUrl={previewUrl}

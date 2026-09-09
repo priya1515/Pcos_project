@@ -120,20 +120,18 @@ function buildPrintHtml(scan) {
   .img-col img {
     display: block;
     width: 100%;
-    height: 195px;
-    object-fit: cover;
+    height: auto;
     border-radius: 7px;
     border: 1px solid #e2e8f0;
   }
   .img-placeholder {
     display: block;
     width: 100%;
-    height: 195px;
+    padding: 40px 0;
     border-radius: 7px;
     border: 1px dashed #cbd5e1;
     background: #f1f5f9;
     text-align: center;
-    line-height: 195px;
     font-size: 10.5px;
     color: #94a3b8;
   }
@@ -314,7 +312,7 @@ function buildPrintHtml(scan) {
   <div class="section">
     <div class="section-title">Ultrasound Image</div>
     <img src="${original}" alt="Ultrasound"
-      style="display:block;width:240px;height:195px;object-fit:cover;border-radius:7px;border:1px solid #e2e8f0"/>
+      style="display:block;width:100%;height:auto;border-radius:7px;border:1px solid #e2e8f0"/>
   </div>` : ""}
 
   <!-- Recommendations -->

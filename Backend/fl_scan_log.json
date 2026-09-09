@@ -1,0 +1,46 @@
+[
+  {
+    "id": "scan-1788961455471",
+    "hospital": "hospital_c",
+    "timestamp": "2026-09-09T13:44:15.471Z",
+    "fileName": "img_0_56.jpg",
+    "prediction": "PCOS",
+    "pcos_probability": 0.5156,
+    "normal_probability": 0.4844,
+    "image_prediction": "normal",
+    "clinical_prediction": "PCOS"
+  },
+  {
+    "id": "scan-1788959912293",
+    "hospital": "hospital_a",
+    "timestamp": "2026-09-09T13:18:32.293Z",
+    "fileName": "img_0_242.jpg",
+    "prediction": "PCOS",
+    "pcos_probability": 0.6682,
+    "normal_probability": 0.3318,
+    "image_prediction": "pcos",
+    "clinical_prediction": "Normal"
+  },
+  {
+    "id": "scan-1788934110582",
+    "hospital": "hospital_b",
+    "timestamp": "2026-09-09T06:08:30.583Z",
+    "fileName": "img_0_4.jpg",
+    "prediction": "Normal",
+    "pcos_probability": 0.1151,
+    "normal_probability": 0.8849,
+    "image_prediction": "normal",
+    "clinical_prediction": "Normal"
+  },
+  {
+    "id": "scan-1788890435144",
+    "hospital": "hospital_b",
+    "timestamp": "2026-09-08T18:00:35.144Z",
+    "fileName": "img_0_57.jpg",
+    "prediction": "PCOS",
+    "pcos_probability": 0.9548,
+    "normal_probability": 0.0452,
+    "image_prediction": "pcos",
+    "clinical_prediction": "PCOS"
+  }
+]

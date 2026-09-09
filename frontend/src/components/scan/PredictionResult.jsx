@@ -40,7 +40,8 @@ function RecommendationCategory({ type, items }) {
 
 function PredictionResult({ result, onSave, canSave, originalImageUrl, gradcamUrl, clinical }) {
   const isMultimodal = Boolean(result?.final);
-  const gradcamSrc = toDataSrc(gradcamUrl);
+  // gradcamUrl may already be a data: URL (from ScanDetails) or a raw base64 string (from NewScan)
+  const gradcamSrc = gradcamUrl ? toDataSrc(gradcamUrl) : null;
 
   const prediction = isMultimodal
     ? result.final.prediction.toLowerCase()
@@ -184,7 +185,7 @@ function PredictionResult({ result, onSave, canSave, originalImageUrl, gradcamUr
         </Card>
       )}
 
-      {/* ── Model info + save ── */}
+      {/* ── Model info + save (hidden in history view) ── */}
       <Card className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap gap-6 text-sm">
           <div>
@@ -206,10 +207,12 @@ function PredictionResult({ result, onSave, canSave, originalImageUrl, gradcamUr
             </>
           )}
         </div>
-        <Button onClick={onSave} disabled={!canSave} className="shrink-0">
-          <Save className="h-4 w-4" />
-          Save Scan
-        </Button>
+        {onSave && (
+          <Button onClick={onSave} disabled={!canSave} className="shrink-0">
+            <Save className="h-4 w-4" />
+            Save Scan
+          </Button>
+        )}
       </Card>
 
       {/* ── Disclaimer ── */}

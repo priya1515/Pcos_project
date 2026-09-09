@@ -1,0 +1,38 @@
+{
+  "hospital_a": {
+    "train": {
+      "normal": 305,
+      "pcos": 208,
+      "total": 513
+    },
+    "val": {
+      "normal": 76,
+      "pcos": 52,
+      "total": 128
+    }
+  },
+  "hospital_b": {
+    "train": {
+      "normal": 305,
+      "pcos": 208,
+      "total": 513
+    },
+    "val": {
+      "normal": 76,
+      "pcos": 52,
+      "total": 128
+    }
+  },
+  "hospital_c": {
+    "train": {
+      "normal": 305,
+      "pcos": 209,
+      "total": 514
+    },
+    "val": {
+      "normal": 76,
+      "pcos": 52,
+      "total": 128
+    }
+  }
+}

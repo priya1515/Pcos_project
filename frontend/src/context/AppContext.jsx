@@ -23,18 +23,18 @@ function useToasts() {
 }
 
 export function AppProvider({ children }) {
-  const { scans, saveScan, deleteScan, clearScans, exportScans } = useScanHistory();
+  const { scans, saveScan, deleteScan, clearScans, exportScans, refreshScans } = useScanHistory();
   const { health, healthError, refreshHealth } = useHealthStatus();
   const { theme, setTheme } = useTheme();
   const { toasts, pushToast } = useToasts();
   const [compareSelection, setCompareSelection] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   function addCompareSelection(scanId) {
     setCompareSelection((current) => {
       if (current.includes(scanId)) {
         return current.filter((id) => id !== scanId);
       }
-
       return [...current, scanId].slice(-2);
     });
   }
@@ -43,7 +43,7 @@ export function AppProvider({ children }) {
     setCompareSelection([]);
   }
 
-  function saveResultScan({ fileName, imageDataUrl, imageSize, result, clinical }) {
+  function saveResultScan({ fileName, imageDataUrl, imageSize, result, clinical, hospital }) {
     const meta = getPredictionMeta(result.prediction);
 
     const scan = saveScan({
@@ -60,6 +60,8 @@ export function AppProvider({ children }) {
       status: "Completed",
       gradcamImage: result.raw?.gradcam_image || null,
       clinical: clinical || null,
+      hospital: hospital || null,
+      rawResult: result.raw || null,
     });
 
     pushToast({
@@ -126,6 +128,9 @@ export function AppProvider({ children }) {
     clearHistory,
     exportHistory,
     downloadScanReport,
+    refreshScans,
+    searchQuery,
+    setSearchQuery,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

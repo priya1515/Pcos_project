@@ -7,12 +7,15 @@ async function parseResponse(response) {
     : await response.text();
 
   if (!response.ok) {
+    const detail = typeof payload === "object" && payload !== null ? payload.detail : payload;
     const message =
-      typeof payload === "object" && payload !== null
-        ? payload.detail || payload.message
-        : payload;
-
-    throw new Error(message || "Request failed");
+      typeof detail === "string" ? detail
+      : typeof detail === "object" && detail !== null ? (detail.message || "Request failed")
+      : typeof payload === "string" ? payload
+      : "Request failed";
+    const err = new Error(message);
+    err.detail = detail ?? null;
+    throw err;
   }
 
   return payload;

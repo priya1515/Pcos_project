@@ -1,0 +1,702 @@
+[
+  {
+    "timestamp": "2026-09-09T04:42:16.091258",
+    "source": "orchestrator",
+    "message": "Starting FL: 10 rounds, 3 local epochs per hospital."
+  },
+  {
+    "timestamp": "2026-09-09T04:42:19.122973",
+    "source": "hospital_a",
+    "message": "Local training process started."
+  },
+  {
+    "timestamp": "2026-09-09T04:42:19.150585",
+    "source": "hospital_b",
+    "message": "Local training process started."
+  },
+  {
+    "timestamp": "2026-09-09T04:42:19.170552",
+    "source": "hospital_c",
+    "message": "Local training process started."
+  },
+  {
+    "timestamp": "2026-09-09T04:42:26.517229",
+    "source": "server",
+    "message": "Selected clinical features:"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:26.536825",
+    "source": "server",
+    "message": "0: I beta-HCG(mIU/mL)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:26.551904",
+    "source": "server",
+    "message": "1: Follicle No. (R)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:26.561501",
+    "source": "server",
+    "message": "2: II beta-HCG(mIU/mL)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:26.570773",
+    "source": "server",
+    "message": "3: Vit D3 (ng/mL)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:26.583156",
+    "source": "server",
+    "message": "4: Height(Cm)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:26.595991",
+    "source": "server",
+    "message": "5: RBS(mg/dl)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:26.606215",
+    "source": "server",
+    "message": "6: BP _Systolic (mmHg)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:26.617613",
+    "source": "server",
+    "message": "7: Follicle No. (L)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:26.629503",
+    "source": "server",
+    "message": "8: Age (yrs)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:26.633764",
+    "source": "server",
+    "message": "9: AMH(ng/mL)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:26.652413",
+    "source": "server",
+    "message": "10: PRL(ng/mL)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:26.659541",
+    "source": "server",
+    "message": "11: Avg. F size (R) (mm)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:26.675400",
+    "source": "server",
+    "message": "12: LH(mIU/mL)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:26.682261",
+    "source": "server",
+    "message": "13: Pulse rate(bpm)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:26.693647",
+    "source": "server",
+    "message": "14: Cycle length(days)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:26.707239",
+    "source": "server",
+    "message": "Number of selected features: 15"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:26.938533",
+    "source": "hospital_b",
+    "message": "Selected clinical features:"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:26.951436",
+    "source": "hospital_c",
+    "message": "Selected clinical features:"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:26.961058",
+    "source": "hospital_b",
+    "message": "0: I beta-HCG(mIU/mL)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:26.974234",
+    "source": "hospital_c",
+    "message": "0: I beta-HCG(mIU/mL)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:26.985841",
+    "source": "hospital_b",
+    "message": "1: Follicle No. (R)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:26.999489",
+    "source": "hospital_c",
+    "message": "1: Follicle No. (R)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.008718",
+    "source": "hospital_b",
+    "message": "2: II beta-HCG(mIU/mL)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.019015",
+    "source": "hospital_c",
+    "message": "2: II beta-HCG(mIU/mL)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.026355",
+    "source": "hospital_b",
+    "message": "3: Vit D3 (ng/mL)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.040019",
+    "source": "hospital_c",
+    "message": "3: Vit D3 (ng/mL)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.045342",
+    "source": "hospital_b",
+    "message": "4: Height(Cm)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.055979",
+    "source": "hospital_c",
+    "message": "4: Height(Cm)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.072060",
+    "source": "hospital_b",
+    "message": "5: RBS(mg/dl)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.081103",
+    "source": "hospital_c",
+    "message": "5: RBS(mg/dl)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.094338",
+    "source": "hospital_b",
+    "message": "6: BP _Systolic (mmHg)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.104066",
+    "source": "hospital_c",
+    "message": "6: BP _Systolic (mmHg)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.112914",
+    "source": "hospital_b",
+    "message": "7: Follicle No. (L)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.119991",
+    "source": "hospital_c",
+    "message": "7: Follicle No. (L)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.135971",
+    "source": "hospital_b",
+    "message": "8: Age (yrs)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.146897",
+    "source": "hospital_c",
+    "message": "8: Age (yrs)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.155879",
+    "source": "hospital_b",
+    "message": "9: AMH(ng/mL)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.168964",
+    "source": "hospital_c",
+    "message": "9: AMH(ng/mL)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.180367",
+    "source": "hospital_a",
+    "message": "Selected clinical features:"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.193603",
+    "source": "hospital_b",
+    "message": "10: PRL(ng/mL)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.200933",
+    "source": "hospital_c",
+    "message": "10: PRL(ng/mL)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.215172",
+    "source": "hospital_a",
+    "message": "0: I beta-HCG(mIU/mL)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.223508",
+    "source": "hospital_b",
+    "message": "11: Avg. F size (R) (mm)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.232567",
+    "source": "hospital_c",
+    "message": "11: Avg. F size (R) (mm)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.244477",
+    "source": "hospital_a",
+    "message": "1: Follicle No. (R)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.256998",
+    "source": "hospital_b",
+    "message": "12: LH(mIU/mL)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.268373",
+    "source": "hospital_c",
+    "message": "12: LH(mIU/mL)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.275392",
+    "source": "hospital_a",
+    "message": "2: II beta-HCG(mIU/mL)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.287032",
+    "source": "hospital_b",
+    "message": "13: Pulse rate(bpm)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.295450",
+    "source": "hospital_c",
+    "message": "13: Pulse rate(bpm)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.307251",
+    "source": "hospital_a",
+    "message": "3: Vit D3 (ng/mL)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.311268",
+    "source": "hospital_b",
+    "message": "14: Cycle length(days)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.328384",
+    "source": "hospital_c",
+    "message": "14: Cycle length(days)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.330562",
+    "source": "hospital_c",
+    "message": "Number of selected features: 15"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.343321",
+    "source": "hospital_b",
+    "message": "Number of selected features: 15"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.360313",
+    "source": "hospital_a",
+    "message": "4: Height(Cm)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.372804",
+    "source": "hospital_a",
+    "message": "5: RBS(mg/dl)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.385272",
+    "source": "hospital_a",
+    "message": "6: BP _Systolic (mmHg)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.396195",
+    "source": "hospital_a",
+    "message": "7: Follicle No. (L)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.407323",
+    "source": "hospital_a",
+    "message": "8: Age (yrs)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.417779",
+    "source": "hospital_a",
+    "message": "9: AMH(ng/mL)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.417779",
+    "source": "hospital_a",
+    "message": "10: PRL(ng/mL)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.431946",
+    "source": "hospital_a",
+    "message": "11: Avg. F size (R) (mm)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.447999",
+    "source": "hospital_a",
+    "message": "12: LH(mIU/mL)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.454466",
+    "source": "hospital_a",
+    "message": "13: Pulse rate(bpm)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.472653",
+    "source": "hospital_a",
+    "message": "14: Cycle length(days)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:27.479444",
+    "source": "hospital_a",
+    "message": "Number of selected features: 15"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:28.659279",
+    "source": "hospital_b",
+    "message": "Clinical classification threshold: 0.5"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:28.669304",
+    "source": "hospital_c",
+    "message": "Clinical classification threshold: 0.5"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:28.679807",
+    "source": "hospital_c",
+    "message": "Clinical Model 2 loaded successfully."
+  },
+  {
+    "timestamp": "2026-09-09T04:42:28.694178",
+    "source": "hospital_b",
+    "message": "Clinical Model 2 loaded successfully."
+  },
+  {
+    "timestamp": "2026-09-09T04:42:28.703647",
+    "source": "hospital_c",
+    "message": "Device: cpu"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:28.716553",
+    "source": "hospital_b",
+    "message": "Device: cpu"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:28.784452",
+    "source": "hospital_a",
+    "message": "Clinical classification threshold: 0.5"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:28.792212",
+    "source": "server",
+    "message": "Clinical classification threshold: 0.5"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:28.805803",
+    "source": "server",
+    "message": "Clinical Model 2 loaded successfully."
+  },
+  {
+    "timestamp": "2026-09-09T04:42:28.818232",
+    "source": "hospital_a",
+    "message": "Clinical Model 2 loaded successfully."
+  },
+  {
+    "timestamp": "2026-09-09T04:42:28.831009",
+    "source": "server",
+    "message": "Device: cpu"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:28.842188",
+    "source": "hospital_a",
+    "message": "Device: cpu"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:28.854664",
+    "source": "server",
+    "message": "[Server] Building initial global model from pretrained weights..."
+  },
+  {
+    "timestamp": "2026-09-09T04:42:29.912463",
+    "source": "hospital_b",
+    "message": "Image  \u2014 train: 513  val: 128"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:29.932334",
+    "source": "hospital_b",
+    "message": "Clinical \u2014 train: 143  val: 36"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:29.989385",
+    "source": "hospital_c",
+    "message": "Image  \u2014 train: 514  val: 128"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:30.011535",
+    "source": "hospital_c",
+    "message": "Clinical \u2014 train: 145  val: 35"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:30.029394",
+    "source": "server",
+    "message": "[Server] Loaded pretrained image weights  -> C:\\Users\\priya\\Pictures\\Pcos\\PCOS_Detection\\backend\\models\\image\\best_model.pth"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:30.054989",
+    "source": "server",
+    "message": "[Server] Loaded pretrained clinical weights -> C:\\Users\\priya\\Pictures\\Pcos\\PCOS_Detection\\backend\\models\\clinical\\clinical_mlp_model2_best.pth"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:30.068890",
+    "source": "hospital_a",
+    "message": "Image  \u2014 train: 513  val: 128"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:30.084708",
+    "source": "hospital_a",
+    "message": "Clinical \u2014 train: 144  val: 36"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:30.236450",
+    "source": "server",
+    "message": "C:\\Users\\priya\\Pictures\\Pcos\\PCOS_Detection\\backend\\fl_server.py:157: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC)."
+  },
+  {
+    "timestamp": "2026-09-09T04:42:30.255185",
+    "source": "server",
+    "message": "\"started_at\":    datetime.utcnow().isoformat(),"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:30.630841",
+    "source": "server",
+    "message": "[Server] Ready \u2014 10 rounds, waiting for 3 clients..."
+  },
+  {
+    "timestamp": "2026-09-09T04:42:30.648077",
+    "source": "server",
+    "message": "[Server] Starting on port 8080 \u2014 10 rounds, min 3 clients"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:30.660564",
+    "source": "server",
+    "message": "Instead, use the `flower-superlink` CLI command to start a SuperLink as shown below:"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:30.675708",
+    "source": "server",
+    "message": "$ flower-superlink --insecure"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:30.690897",
+    "source": "server",
+    "message": "To view usage and all available options, run:"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:30.700232",
+    "source": "server",
+    "message": "$ flower-superlink --help"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:30.716852",
+    "source": "server",
+    "message": "Using `start_server()` is deprecated."
+  },
+  {
+    "timestamp": "2026-09-09T04:42:30.726907",
+    "source": "server",
+    "message": "entirely in future versions of Flower."
+  },
+  {
+    "timestamp": "2026-09-09T04:42:30.746591",
+    "source": "server",
+    "message": "INFO :      Starting Flower server, config: num_rounds=10, no round_timeout"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:30.757752",
+    "source": "server",
+    "message": "INFO :      Flower ECE: gRPC server running (10 rounds), SSL is disabled"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:30.769024",
+    "source": "server",
+    "message": "INFO :      [INIT]"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:30.783960",
+    "source": "server",
+    "message": "INFO :      Using initial global parameters provided by strategy"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:30.796521",
+    "source": "server",
+    "message": "INFO :      Starting evaluation of initial global parameters"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:30.809285",
+    "source": "server",
+    "message": "INFO :      Evaluation returned no results (`None`)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:30.824263",
+    "source": "server",
+    "message": "INFO :"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:30.838008",
+    "source": "server",
+    "message": "INFO :      [ROUND 1]"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:32.334362",
+    "source": "hospital_b",
+    "message": "flwr.client.start_client("
+  },
+  {
+    "timestamp": "2026-09-09T04:42:32.342670",
+    "source": "hospital_b",
+    "message": ")"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:32.360960",
+    "source": "hospital_c",
+    "message": "flwr.client.start_client("
+  },
+  {
+    "timestamp": "2026-09-09T04:42:32.374996",
+    "source": "hospital_a",
+    "message": "flwr.client.start_client("
+  },
+  {
+    "timestamp": "2026-09-09T04:42:32.388579",
+    "source": "hospital_b",
+    "message": "Using `start_numpy_client()` is deprecated."
+  },
+  {
+    "timestamp": "2026-09-09T04:42:32.401446",
+    "source": "server",
+    "message": "[Server] Round 1 \u2014 3 client(s) connected"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:32.416428",
+    "source": "hospital_c",
+    "message": ")"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:32.429307",
+    "source": "hospital_a",
+    "message": ")"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:32.441167",
+    "source": "hospital_b",
+    "message": "entirely in future versions of Flower."
+  },
+  {
+    "timestamp": "2026-09-09T04:42:32.458826",
+    "source": "server",
+    "message": "INFO :      configure_fit: strategy sampled 3 clients (out of 3)"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:32.464991",
+    "source": "hospital_c",
+    "message": "Using `start_numpy_client()` is deprecated."
+  },
+  {
+    "timestamp": "2026-09-09T04:42:32.484145",
+    "source": "hospital_a",
+    "message": "Using `start_numpy_client()` is deprecated."
+  },
+  {
+    "timestamp": "2026-09-09T04:42:32.498202",
+    "source": "hospital_b",
+    "message": "Using `start_client()` is deprecated."
+  },
+  {
+    "timestamp": "2026-09-09T04:42:32.512707",
+    "source": "hospital_c",
+    "message": "entirely in future versions of Flower."
+  },
+  {
+    "timestamp": "2026-09-09T04:42:32.524494",
+    "source": "hospital_a",
+    "message": "entirely in future versions of Flower."
+  },
+  {
+    "timestamp": "2026-09-09T04:42:32.532420",
+    "source": "hospital_b",
+    "message": "entirely in future versions of Flower."
+  },
+  {
+    "timestamp": "2026-09-09T04:42:32.551741",
+    "source": "hospital_c",
+    "message": "Using `start_client()` is deprecated."
+  },
+  {
+    "timestamp": "2026-09-09T04:42:32.563773",
+    "source": "hospital_a",
+    "message": "Using `start_client()` is deprecated."
+  },
+  {
+    "timestamp": "2026-09-09T04:42:32.577022",
+    "source": "hospital_c",
+    "message": "entirely in future versions of Flower."
+  },
+  {
+    "timestamp": "2026-09-09T04:42:32.588146",
+    "source": "hospital_a",
+    "message": "entirely in future versions of Flower."
+  },
+  {
+    "timestamp": "2026-09-09T04:42:34.891308",
+    "source": "hospital_b",
+    "message": "INFO :"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:34.918991",
+    "source": "hospital_b",
+    "message": "INFO :      Received: train message 657ba49a-cbd6-4043-b568-2bcea58bcbcd"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:34.939433",
+    "source": "hospital_a",
+    "message": "INFO :"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:34.964949",
+    "source": "hospital_a",
+    "message": "INFO :      Received: train message 1ae00808-0e65-45fa-8245-d21cf84336fa"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:35.103570",
+    "source": "hospital_b",
+    "message": "Training image model (3 epochs)..."
+  },
+  {
+    "timestamp": "2026-09-09T04:42:35.142488",
+    "source": "hospital_a",
+    "message": "Training image model (3 epochs)..."
+  },
+  {
+    "timestamp": "2026-09-09T04:42:35.266574",
+    "source": "hospital_c",
+    "message": "INFO :"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:35.282387",
+    "source": "hospital_c",
+    "message": "INFO :      Received: train message 1c6b50a5-23aa-4280-9d43-e366fcd41696"
+  },
+  {
+    "timestamp": "2026-09-09T04:42:35.433165",
+    "source": "hospital_c",
+    "message": "Training image model (3 epochs)..."
+  }
+]

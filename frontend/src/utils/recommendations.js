@@ -36,6 +36,12 @@ export function generateRecommendations(pcosProbPct, clinical) {
   const medical   = [];
   const lifestyle = [];
 
+  // The first item always reflects the screening result, so normal and PCOS
+  // results cannot receive the same generic lifestyle recommendation.
+  lifestyle.push(isPcos
+    ? "Focus on a PCOS-supportive routine: regular high-fibre, low-GI meals plus aerobic and resistance exercise each week."
+    : "Maintain the reassuring screening result with balanced meals, regular activity, adequate sleep, and routine preventive check-ups.");
+
   // ── 1. Clinical-value flags (only when a value is actually abnormal) ──
 
   if (clinical) {
@@ -85,19 +91,19 @@ export function generateRecommendations(pcosProbPct, clinical) {
   if (tier === "moderate") {
     if (medical.length === 0)
       medical.push("Comprehensive PCOS evaluation recommended — full hormonal panel (FSH, LH, testosterone, DHEAS) and thyroid function.");
-    if (lifestyle.length === 0)
+    if (lifestyle.length === 1)
       lifestyle.push("Advise low-GI, anti-inflammatory diet and regular aerobic and resistance exercise to improve insulin sensitivity.");
 
   } else if (tier === "high") {
     if (medical.length === 0)
       medical.push("Specialist referral to a reproductive endocrinologist recommended. Discuss Metformin or hormonal therapy options.");
-    if (lifestyle.length === 0)
+    if (lifestyle.length === 1)
       lifestyle.push("Advise structured weight management — even 5–7% weight reduction significantly improves PCOS symptoms.");
 
   } else if (tier === "very-high") {
     if (medical.length === 0)
       medical.push("Urgent referral to reproductive endocrinologist. Evaluate for metabolic syndrome, type 2 diabetes, and fertility implications.");
-    if (lifestyle.length === 0)
+    if (lifestyle.length === 1)
       lifestyle.push("Refer to a clinical dietitian for a personalised PCOS nutrition plan. Structured exercise under supervision recommended.");
   }
 

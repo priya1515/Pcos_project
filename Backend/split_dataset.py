@@ -5,16 +5,16 @@ Splits an existing ImageFolder dataset into 3 hospital partitions for FL simulat
 Usage:
     python split_dataset.py --data_dir ./data --output_dir ./data/federated --splits 3
 
-Expected input structure:
+Expected input structure (case-insensitive class folders):
     data/
       train/
-        pcos/   *.jpg
-        normal/ *.jpg
+        pcos/ or PCOS/   *.jpg
+        normal/ or Normal/ *.jpg
       val/
-        pcos/   *.jpg
-        normal/ *.jpg
+        pcos/ or PCOS/   *.jpg
+        normal/ or Normal/ *.jpg
 
-Output structure:
+Output structure (always lowercase):
     data/federated/
       hospital_a/train/pcos, hospital_a/train/normal, hospital_a/val/...
       hospital_b/train/pcos, hospital_b/train/normal, hospital_b/val/...
@@ -53,31 +53,34 @@ def split_dataset(data_dir, output_dir, n_splits=3):
             print(f"Skipping {subset} — directory not found.")
             continue
 
-        classes = [
+        # Collect class folders; normalise names to lowercase for output
+        raw_classes = [
             d for d in os.listdir(subset_dir)
             if os.path.isdir(os.path.join(subset_dir, d))
         ]
+        # Map lowercase canonical name → actual folder name on disk
+        class_map = {d.lower(): d for d in raw_classes}
 
         class_splits = {}
-        for cls in classes:
-            cls_dir = os.path.join(subset_dir, cls)
+        for cls_lower, cls_actual in class_map.items():
+            cls_dir = os.path.join(subset_dir, cls_actual)
             files = [
                 os.path.join(cls_dir, f)
                 for f in os.listdir(cls_dir)
                 if f.lower().endswith((".jpg", ".jpeg", ".png"))
             ]
-            class_splits[cls] = split_class_files(files, n_splits)
+            class_splits[cls_lower] = split_class_files(files, n_splits)
 
         for i, hospital in enumerate(HOSPITAL_NAMES[:n_splits]):
-            for cls in classes:
-                dest_dir = os.path.join(output_dir, hospital, subset, cls)
+            for cls_lower in class_splits:
+                dest_dir = os.path.join(output_dir, hospital, subset, cls_lower)
                 os.makedirs(dest_dir, exist_ok=True)
-                for src in class_splits[cls][i]:
+                for src in class_splits[cls_lower][i]:
                     shutil.copy2(src, os.path.join(dest_dir, os.path.basename(src)))
 
-            total = sum(len(class_splits[cls][i]) for cls in classes)
+            total = sum(len(class_splits[cls][i]) for cls in class_splits)
             splits_info.setdefault(hospital, {})[subset] = {
-                cls: len(class_splits[cls][i]) for cls in classes
+                cls: len(class_splits[cls][i]) for cls in class_splits
             }
             splits_info[hospital][subset]["total"] = total
             print(f"  {hospital}/{subset}: {splits_info[hospital][subset]}")
