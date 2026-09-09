@@ -25,3 +25,11 @@ dist-ssr
 *.sln
 *.sw?
 .agents
+
+# Private / medical datasets
+*.csv
+*.xlsx
+*.xls
+datasets/
+data/
+ultrasound_images/
