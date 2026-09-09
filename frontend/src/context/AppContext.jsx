@@ -23,6 +23,13 @@ function useToasts() {
 }
 
 export function AppProvider({ children }) {
+  const [user, setUser] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("femwell_user")) || null;
+    } catch {
+      return null;
+    }
+  });
   const { scans, saveScan, deleteScan, clearScans, exportScans, refreshScans } = useScanHistory();
   const { health, healthError, refreshHealth } = useHealthStatus();
   const { theme, setTheme } = useTheme();
@@ -93,6 +100,26 @@ export function AppProvider({ children }) {
     });
   }
 
+  function login(username, password) {
+    const accounts = {
+      doctor: { username: "doctor", role: "doctor", password: "doctor123" },
+      admin: { username: "admin", role: "admin", password: "admin123" },
+    };
+    const account = accounts[username.trim().toLowerCase()];
+
+    if (!account || account.password !== password) return false;
+
+    const session = { username: account.username, role: account.role };
+    localStorage.setItem("femwell_user", JSON.stringify(session));
+    setUser(session);
+    return true;
+  }
+
+  function logout() {
+    localStorage.removeItem("femwell_user");
+    setUser(null);
+  }
+
   function exportHistory() {
     const blob = new Blob([exportScans()], { type: "application/json;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -112,6 +139,10 @@ export function AppProvider({ children }) {
   }
 
   const value = {
+    user,
+    isAuthenticated: Boolean(user),
+    login,
+    logout,
     scans,
     health,
     healthError,
